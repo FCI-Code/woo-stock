@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantStatus {
+  active
+  inactive
+}
+
+enum OrderStatus {
+  received
+  quoting
+  ready_to_ship
+  shipped
+  in_transit
+  delivered
+  error
+}
+
+enum ShipmentStatus {
+  quoted
+  label_generated
+  posted
+  in_transit
+  delivered
+  error
+}
+
+enum WebhookLogStatus {
+  processed
+  error
+  ignored
+}
+
+model Tenant {
+  id                            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name                          String?
+  store_url                     String
+  api_key_hash                  String       @unique
+  woo_consumer_key_encrypted    String
+  woo_consumer_secret_encrypted String
+  webhook_secret                String
+  origin_zip                    String
+  origin_address                Json
+  melhor_envio_token_encrypted  String
+  status                        TenantStatus
+  created_at                    DateTime     @default(now())
+
+  @@map("tenants")
+}
+
+model Order {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id        String      @db.ObjectId
+  woo_order_id     Int
+  status           OrderStatus
+  customer_name    String
+  customer_email   String
+  shipping_address Json
+  items            Json
+  total_weight     Float
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+
+  @@unique([tenant_id, woo_order_id])
+  @@map("orders")
+}
+
+model Shipment {
+  id                       String         @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id                String         @db.ObjectId
+  order_id                 String         @unique @db.ObjectId
+  melhor_envio_shipment_id String?
+  carrier                  String
+  service                  String
+  tracking_code            String?
+  label_url                String?
+  status                   ShipmentStatus
+  shipping_cost            Float
+  estimated_days           Int
+  quoted_options           Json
+  created_at               DateTime       @default(now())
+  updated_at               DateTime       @updatedAt
+
+  @@map("shipments")
+}
+
+model WebhookLog {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id       String           @db.ObjectId
+  event_type      String
+  payload_summary Json
+  status          WebhookLogStatus
+  error_message   String?
+  created_at      DateTime         @default(now())
+
+  @@map("webhook_logs")
+}
