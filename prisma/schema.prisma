@@ -90,6 +90,18 @@ model Shipment {
   @@map("shipments")
 }
 
+model ShipmentEvent {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id   String         @db.ObjectId
+  shipment_id String         @db.ObjectId
+  status      ShipmentStatus
+  location    String?
+  description String
+  occurred_at DateTime       @default(now())
+
+  @@map("shipment_events")
+}
+
 model WebhookLog {
   id              String           @id @default(auto()) @map("_id") @db.ObjectId
   tenant_id       String           @db.ObjectId
