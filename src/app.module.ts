@@ -6,14 +6,18 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { ApiKeyGuard } from './api-keys/api-key.guard';
+import { EncryptionModule } from './common/encryption/encryption.module';
 import { ShipmentsModule } from './shipments/shipments.module';
+import { TenantsModule } from './tenants/tenants.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    EncryptionModule,
     ApiKeysModule,
     ShipmentsModule,
+    TenantsModule,
   ],
   controllers: [AppController],
   providers: [

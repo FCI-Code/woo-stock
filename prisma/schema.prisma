@@ -42,12 +42,12 @@ model Tenant {
   name                          String?
   store_url                     String
   api_key_hash                  String       @unique
-  woo_consumer_key_encrypted    String
-  woo_consumer_secret_encrypted String
+  woo_consumer_key_encrypted    String?
+  woo_consumer_secret_encrypted String?
   webhook_secret                String
-  origin_zip                    String
-  origin_address                Json
-  melhor_envio_token_encrypted  String
+  origin_zip                    String?
+  origin_address                Json?
+  melhor_envio_token_encrypted  String?
   status                        TenantStatus
   created_at                    DateTime     @default(now())
 
