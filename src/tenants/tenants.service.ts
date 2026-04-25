@@ -41,7 +41,14 @@ export class TenantsService {
       });
 
       const { api_key_hash: _, ...rest } = tenant;
-      return { ...rest, api_key: apiKey, webhook_secret: webhookSecret };
+      const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
+      const webhookUrl = `${appUrl}/webhooks/woocommerce/${tenant.id}`;
+      return {
+        ...rest,
+        api_key: apiKey,
+        webhook_secret: webhookSecret,
+        webhook_url: webhookUrl,
+      };
     } catch (e: unknown) {
       const isUniqueViolation =
         e instanceof Error && 'code' in e && (e as { code: string }).code === 'P2002';

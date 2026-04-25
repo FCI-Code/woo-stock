@@ -23,8 +23,7 @@ WooStock é uma **API de logística como serviço** para lojas WooCommerce. Cada
 ### O que o WooStock NÃO faz
 
 - Cadastro de usuários / login / dashboard
-- Gestão de estoque
-- Gestão de produtos / catálogo
+- Gestão de produtos
 - Processamento de pagamentos
 - Frontend de qualquer tipo
 

@@ -7,8 +7,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { ApiKeyGuard } from './api-keys/api-key.guard';
 import { EncryptionModule } from './common/encryption/encryption.module';
+import { OrdersModule } from './orders/orders.module';
 import { ShipmentsModule } from './shipments/shipments.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -16,8 +18,10 @@ import { TenantsModule } from './tenants/tenants.module';
     PrismaModule,
     EncryptionModule,
     ApiKeysModule,
+    OrdersModule,
     ShipmentsModule,
     TenantsModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [
