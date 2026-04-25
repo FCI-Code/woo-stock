@@ -2,7 +2,7 @@
 
 > Baseado na especificação `README.md` · Atualizado em 2026-04-25
 
-**Progresso geral estimado: ~50%** (fundação + ingestão de pedidos via webhook prontas; integrações outbound e jobs pendentes)
+**Progresso geral estimado: ~70%** (fluxo principal de cotação e despacho operacional; tracking automático, filas e segurança adicional pendentes)
 
 ---
 
@@ -71,21 +71,26 @@
 
 ---
 
-## 7. Cotação & Despacho — Módulo `shipping` ❌
+## 7. Cotação & Despacho — Módulo `shipping` ⚠️ Parcial
 
-- [ ] `POST /shipping/quote` — cota frete via Melhor Envio
-- [ ] `POST /shipping/label` — gera etiqueta para opção escolhida
+- [x] `POST /shipping/quote` — cota frete via Melhor Envio (sandbox)
+- [x] `POST /shipping/label` — gera etiqueta (cart → checkout → generate → print)
 - [ ] `GET /shipping/tracking/:shipment_id` — consulta status atual do envio
-- [ ] `MelhorEnvioClient` — wrapper da API do Melhor Envio
-- [ ] Leitura automática das credenciais criptografadas do tenant
+- [x] `MelhorEnvioService` — wrapper da API do Melhor Envio (calculate, cart, checkout, generate, print)
+- [x] Leitura automática das credenciais criptografadas do tenant
+- [x] Persistência de cotação em `Shipment.quoted_options` (evita recotar)
+- [x] Schema `Shipment` com campos opcionais para suportar estado `quoted`
+- [x] `ShipmentEvent` registrado quando etiqueta é gerada
 
 ---
 
-## 8. WooCommerce Client ❌
+## 8. WooCommerce Client ⚠️ Parcial
 
-- [ ] `WooCommerceClient` — wrapper da API REST v3 do WooCommerce
-- [ ] Atualização de pedido com `tracking_code` após geração de etiqueta
-- [ ] Atualização de status do pedido no Woo
+- [x] `WoocommerceService` — wrapper minimo da API REST v3 com Basic Auth
+- [x] Atualização de pedido com `tracking_code` após geração de etiqueta (síncrono inline, best-effort)
+- [x] Adição de nota visível ao cliente no pedido com o código de rastreio
+- [x] Marcação do pedido como `completed` no Woo após despacho
+- [ ] Sincronização de demais campos de status (cancelamento, devolução, etc.)
 
 ---
 
@@ -127,8 +132,8 @@
 | Shipments (CRUD) | ✅ Completo |
 | Orders | ✅ Completo |
 | Webhooks WooCommerce | ✅ Completo (inbound) |
-| Cotação & Despacho | ❌ Não iniciado |
-| WooCommerce Client | ❌ Não iniciado |
+| Cotação & Despacho | ⚠️ Parcial (sem tracking endpoint) |
+| WooCommerce Client | ⚠️ Parcial (só update de tracking) |
 | Filas & Jobs | ❌ Não iniciado |
 | Segurança adicional | ❌ Não iniciado |
 | Testes | ❌ Não iniciado |

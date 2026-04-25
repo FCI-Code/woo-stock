@@ -7,8 +7,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { ApiKeyGuard } from './api-keys/api-key.guard';
 import { EncryptionModule } from './common/encryption/encryption.module';
+import { MelhorEnvioModule } from './integrations/melhor-envio/melhor-envio.module';
+import { WoocommerceModule } from './integrations/woocommerce/woocommerce.module';
 import { OrdersModule } from './orders/orders.module';
 import { ShipmentsModule } from './shipments/shipments.module';
+import { ShippingModule } from './shipping/shipping.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 
@@ -17,9 +20,12 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     EncryptionModule,
+    MelhorEnvioModule,
+    WoocommerceModule,
     ApiKeysModule,
     OrdersModule,
     ShipmentsModule,
+    ShippingModule,
     TenantsModule,
     WebhooksModule,
   ],
