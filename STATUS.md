@@ -1,8 +1,8 @@
 # WooStock — Status de Implementação
 
-> Baseado na especificação `README.md` · Atualizado em 2026-04-25
+> Baseado na especificação `README.md` · Atualizado em 2026-04-26
 
-**Progresso geral estimado: ~70%** (fluxo principal de cotação e despacho operacional; tracking automático, filas e segurança adicional pendentes)
+**Progresso geral estimado: ~75%** (fluxo principal de cotação, despacho e tracking operacional; filas assíncronas e segurança adicional pendentes)
 
 ---
 
@@ -71,11 +71,11 @@
 
 ---
 
-## 7. Cotação & Despacho — Módulo `shipping` ⚠️ Parcial
+## 7. Cotação & Despacho — Módulo `shipping` ✅
 
 - [x] `POST /shipping/quote` — cota frete via Melhor Envio (sandbox)
 - [x] `POST /shipping/label` — gera etiqueta (cart → checkout → generate → print)
-- [ ] `GET /shipping/tracking/:shipment_id` — consulta status atual do envio
+- [x] `GET /shipping/tracking/:trackingCode` — consulta status atual + timeline completa (eventos de preparação sintetizados + eventos reais do `ShipmentEvent`)
 - [x] `MelhorEnvioService` — wrapper da API do Melhor Envio (calculate, cart, checkout, generate, print)
 - [x] Leitura automática das credenciais criptografadas do tenant
 - [x] Persistência de cotação em `Shipment.quoted_options` (evita recotar)
@@ -122,6 +122,30 @@
 
 ---
 
+## 12. Frontend — Página de Tracking ❌
+
+> `apps/web` — Next.js público, sem autenticação
+
+- [ ] Página `/tracking/[trackingCode]` — exibe status atual e timeline completa
+- [ ] Consume `GET /shipping/tracking/:trackingCode` via proxy/server action do Next.js
+- [ ] Design responsivo com estados: loading, não encontrado, timeline de eventos
+- [ ] Deploy e configuração de domínio público
+
+---
+
+## 13. Billing & Taxa de Entrega ❌
+
+> Modelo: WooStock cobra taxa da loja ao concluir cada entrega
+
+- [ ] Modelo de dados para registrar taxa por entrega concluída
+- [ ] Integração com gateway de pagamento (Stripe ou similar)
+- [ ] Endpoint para consulta de faturas por tenant
+- [ ] Webhook/job que dispara cobrança quando `shipment.status = delivered`
+
+> ⚠️ Entrega física é mockada no MVP — este módulo depende da implementação do transporte real
+
+---
+
 ## Resumo por Área
 
 | Área | Status |
@@ -132,8 +156,10 @@
 | Shipments (CRUD) | ✅ Completo |
 | Orders | ✅ Completo |
 | Webhooks WooCommerce | ✅ Completo (inbound) |
-| Cotação & Despacho | ⚠️ Parcial (sem tracking endpoint) |
+| Cotação & Despacho | ✅ Completo |
 | WooCommerce Client | ⚠️ Parcial (só update de tracking) |
 | Filas & Jobs | ❌ Não iniciado |
 | Segurança adicional | ❌ Não iniciado |
 | Testes | ❌ Não iniciado |
+| Frontend — Tracking Page | ❌ Não iniciado |
+| Billing & Taxa de Entrega | ❌ Não iniciado |

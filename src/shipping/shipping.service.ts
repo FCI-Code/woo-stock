@@ -17,6 +17,7 @@ import { WoocommerceService } from '../integrations/woocommerce/woocommerce.serv
 import { PrismaService } from '../prisma/prisma.service';
 import { LabelRequestDto } from './dto/label-request.dto';
 import { QuoteItemDto, QuoteRequestDto } from './dto/quote-request.dto';
+import { TrackingEventDto, TrackingResponseDto } from './dto/tracking-response.dto';
 
 interface OrderItem {
   name?: string;
@@ -207,6 +208,76 @@ export class ShippingService {
       carrier: carrierName,
       service: serviceName,
       cost,
+    };
+  }
+
+  async getTracking(tenantId: string, trackingCode: string): Promise<TrackingResponseDto> {
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { tracking_code: trackingCode, tenant_id: tenantId },
+    });
+    if (!shipment) {
+      throw new NotFoundException(`Shipment with tracking code "${trackingCode}" not found`);
+    }
+
+    const [order, dbEvents] = await Promise.all([
+      this.prisma.order.findFirst({ where: { id: shipment.order_id, tenant_id: tenantId } }),
+      this.prisma.shipmentEvent.findMany({
+        where: { shipment_id: shipment.id, tenant_id: tenantId },
+        orderBy: { occurred_at: 'asc' },
+      }),
+    ]);
+
+    const preparationEvents: TrackingEventDto[] = [];
+
+    if (order) {
+      preparationEvents.push({
+        type: 'preparation',
+        status: 'order_received',
+        description: 'Pedido recebido da loja',
+        location: null,
+        occurred_at: order.created_at,
+      });
+    }
+
+    preparationEvents.push({
+      type: 'preparation',
+      status: 'quoted',
+      description:
+        shipment.carrier && shipment.service
+          ? `Frete cotado — ${shipment.carrier} ${shipment.service}`
+          : 'Frete cotado',
+      location: null,
+      occurred_at: shipment.created_at,
+    });
+
+    const shipmentEvents: TrackingEventDto[] = dbEvents.map((e) => ({
+      type: 'shipment' as const,
+      status: e.status,
+      description: e.description,
+      location: e.location ?? null,
+      occurred_at: e.occurred_at,
+    }));
+
+    const timeline = [...preparationEvents, ...shipmentEvents].sort(
+      (a, b) => a.occurred_at.getTime() - b.occurred_at.getTime(),
+    );
+
+    return {
+      tracking_code: shipment.tracking_code!,
+      current_status: shipment.status,
+      carrier: shipment.carrier,
+      service: shipment.service,
+      estimated_days: shipment.estimated_days,
+      label_url: shipment.label_url,
+      order: order
+        ? {
+            id: order.id,
+            woo_order_id: order.woo_order_id,
+            customer_name: order.customer_name,
+            customer_email: order.customer_email,
+          }
+        : { id: '', woo_order_id: 0, customer_name: 'N/A', customer_email: 'N/A' },
+      timeline,
     };
   }
 
