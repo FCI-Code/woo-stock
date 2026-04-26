@@ -122,13 +122,14 @@
 
 ---
 
-## 12. Frontend — Página de Tracking ❌
+## 12. Frontend — Página de Tracking ⚠️ Parcial
 
 > `apps/web` — Next.js público, sem autenticação
 
-- [ ] Página `/tracking/[trackingCode]` — exibe status atual e timeline completa
-- [ ] Consume `GET /shipping/tracking/:trackingCode` via proxy/server action do Next.js
-- [ ] Design responsivo com estados: loading, não encontrado, timeline de eventos
+- [x] Página `/tracking/[trackingCode]` — exibe status atual e timeline completa
+- [x] Consume `GET /shipping/tracking/:trackingCode` via server component Next.js (proxy com `TRACKING_API_KEY`)
+- [x] Design responsivo com estados: não encontrado (404), erro de serviço e timeline de eventos
+- [x] Página `/` com formulário de busca por código de rastreio
 - [ ] Deploy e configuração de domínio público
 
 ---
@@ -161,5 +162,5 @@
 | Filas & Jobs | ❌ Não iniciado |
 | Segurança adicional | ❌ Não iniciado |
 | Testes | ❌ Não iniciado |
-| Frontend — Tracking Page | ❌ Não iniciado |
+| Frontend — Tracking Page | ⚠️ Parcial (sem deploy) |
 | Billing & Taxa de Entrega | ❌ Não iniciado |
