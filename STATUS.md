@@ -134,12 +134,27 @@
 
 ---
 
-## 13. Billing & Taxa de Entrega ❌
+## 13. Mock Delivery Simulator — Módulo `delivery-simulator` ✅
+
+> Cron interno (`@nestjs/schedule`) que avança automaticamente os envios pelas etapas mockadas
+
+- [x] `DeliverySimulatorService` com `@Cron(EVERY_5_MINUTES)`
+- [x] Progressão: `label_generated → posted → in_transit → delivered`
+- [x] Cria `ShipmentEvent` em cada transição com descrição em PT-BR
+- [x] Sincroniza `Order.status` em `in_transit` e `delivered`
+- [x] Desativável via `DELIVERY_MOCK_ENABLED` (env var)
+- [x] Transações Prisma atômicas por shipment
+- [x] Tratamento de erro por shipment (não interrompe o batch)
+
+> ⚠️ Substituível pelo polling real do Melhor Envio quando o transporte real for implementado
+
+---
+
+## 14. Billing & Taxa de Entrega ❌
 
 > Modelo: WooStock cobra taxa da loja ao concluir cada entrega
 
 - [ ] Modelo de dados para registrar taxa por entrega concluída
-- [ ] Integração com gateway de pagamento (Stripe ou similar)
 - [ ] Endpoint para consulta de faturas por tenant
 - [ ] Webhook/job que dispara cobrança quando `shipment.status = delivered`
 
@@ -149,18 +164,19 @@
 
 ## Resumo por Área
 
-| Área | Status |
-|------|--------|
-| Infraestrutura | ✅ Completo |
-| Autenticação | ✅ Completo |
-| Tenants | ✅ Completo |
-| Shipments (CRUD) | ✅ Completo |
-| Orders | ✅ Completo |
-| Webhooks WooCommerce | ✅ Completo (inbound) |
-| Cotação & Despacho | ✅ Completo |
-| WooCommerce Client | ⚠️ Parcial (só update de tracking) |
-| Filas & Jobs | ❌ Não iniciado |
-| Segurança adicional | ❌ Não iniciado |
-| Testes | ❌ Não iniciado |
-| Frontend — Tracking Page | ⚠️ Parcial (sem deploy) |
-| Billing & Taxa de Entrega | ❌ Não iniciado |
+| Área                      | Status                             |
+| ------------------------- | ---------------------------------- |
+| Infraestrutura            | ✅ Completo                        |
+| Autenticação              | ✅ Completo                        |
+| Tenants                   | ✅ Completo                        |
+| Shipments (CRUD)          | ✅ Completo                        |
+| Orders                    | ✅ Completo                        |
+| Webhooks WooCommerce      | ✅ Completo (inbound)              |
+| Cotação & Despacho        | ✅ Completo                        |
+| WooCommerce Client        | ⚠️ Parcial (só update de tracking) |
+| Filas & Jobs              | ❌ Não iniciado                    |
+| Segurança adicional       | ❌ Não iniciado                    |
+| Testes                    | ❌ Não iniciado                    |
+| Frontend — Tracking Page  | ⚠️ Parcial (sem deploy)            |
+| Mock Delivery Simulator   | ✅ Completo                        |
+| Billing & Taxa de Entrega | ❌ Não iniciado                    |
