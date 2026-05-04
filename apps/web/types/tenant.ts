@@ -17,3 +17,12 @@ export interface TenantProfile {
   status: 'active' | 'inactive';
   created_at: string;
 }
+
+export interface TenantUpdatePayload {
+  name?: string;
+  store_url?: string;
+  origin_zip?: string;
+  woo_consumer_key?: string;
+  woo_consumer_secret?: string;
+  melhor_envio_token?: string;
+}

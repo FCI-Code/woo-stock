@@ -1,4 +1,4 @@
-import type { Shipment } from '@/types/shipment';
+import type { Shipment, ShipmentDetail } from '@/types/shipment';
 import type { ShipmentStatus } from '@/types/tracking';
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3000';
@@ -18,4 +18,15 @@ export async function getShipments(
   if (!res.ok) throw new Error('Failed to fetch shipments');
 
   return res.json() as Promise<Shipment[]>;
+}
+
+export async function getShipment(apiKey: string, id: string): Promise<ShipmentDetail> {
+  const res = await fetch(`${API_URL}/shipments/${id}`, {
+    headers: { 'X-API-Key': apiKey },
+    next: { tags: ['shipment', id] },
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch shipment');
+
+  return res.json() as Promise<ShipmentDetail>;
 }
