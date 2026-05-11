@@ -1,7 +1,8 @@
 # compiled output
-/dist
-/node_modules
-/build
+**/dist
+**/node_modules
+**/build
+**/.next
 
 # Logs
 logs
@@ -16,8 +17,8 @@ lerna-debug.log*
 .DS_Store
 
 # Tests
-/coverage
-/.nyc_output
+**/coverage
+**/.nyc_output
 
 # IDEs and editors
 /.idea
@@ -36,11 +37,14 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+**/.env
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.local
+
+# Turborepo
+.turbo
 
 # temp directory
 .temp
@@ -52,5 +56,5 @@ pids
 *.seed
 *.pid.lock
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
+# Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
