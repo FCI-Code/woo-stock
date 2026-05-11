@@ -8,37 +8,40 @@
 
 ## 1. Visão Geral
 
-WooStock é uma **API de logística como serviço** para lojas WooCommerce. Cada lojista conecta sua loja via chave de API, e a partir disso o WooStock recebe pedidos, gerencia o despacho (cotação de frete, geração de etiqueta) e devolve o código de rastreamento para o WooCommerce.
+WooStock é uma **empresa especializada em logística e entrega** que oferece sua infraestrutura como serviço para lojas WooCommerce. Cada lojista conecta sua loja via chave de API; o WooStock recebe os pedidos, gerencia o despacho (cotação de frete, geração de etiqueta) e executa o transporte — devolvendo o status de rastreamento ao WooCommerce em tempo real.
 
-**Filosofia:** construir o mínimo e aproveitar o máximo do WooCommerce. O Woo é dono de tudo — produtos, estoque, pagamentos, cadastro. O WooStock é apenas o motor de logística.
+**Filosofia:** o WooCommerce é dono de tudo relacionado à loja (produtos, estoque, pagamentos, cadastro de clientes). O WooStock é o motor de logística e transporte — da cotação à entrega na porta do cliente.
+
+> **MVP:** A entrega física é simulada (mockada). A infraestrutura de transporte real será implementada em fase posterior.
 
 ### O que o WooStock faz
 
 - Recebe notificação de pedido do WooCommerce (via webhook)
 - Cota frete com transportadoras (via Melhor Envio)
 - Gera etiqueta de envio
+- Executa o transporte e atualiza o status de rastreamento
 - Devolve código de rastreamento para o WooCommerce
-- Atualiza status de entrega no WooCommerce
+- Exibe página pública de tracking para o cliente final
+- Cobra taxa de entrega da loja ao concluir o transporte
 
 ### O que o WooStock NÃO faz
 
-- Cadastro de usuários / login / dashboard
-- Gestão de estoque
-- Gestão de produtos / catálogo
-- Processamento de pagamentos
-- Frontend de qualquer tipo
+- Cadastro de usuários / login / dashboard do lojista
+- Gestão de produtos ou estoque
+- Processamento de pagamentos do consumidor final
 
 ### Modelo de negócio
 
-- API SaaS multi-tenant
-- Cada lojista = uma chave de API = uma loja WooCommerce
+- Empresa de logística B2B: o lojista nos contrata para realizar o transporte
+- API SaaS multi-tenant — cada lojista = uma chave de API = uma loja WooCommerce
 - Autenticação via API key (sem cadastro, sem login)
-- Cobrança por uso (definição de planos fora do escopo do MVP)
+- **Receita:** taxa por entrega concluída, cobrada da loja (gateway de pagamento fora do escopo do MVP)
 
 ### Stack
 
 - **Backend:** NestJS + TypeScript
-- **Banco:** PostgreSQL (multi-tenant via `tenant_id` por tabela)
+- **Frontend:** Next.js (`apps/web`) — página pública de tracking
+- **Banco:** MongoDB com Prisma (multi-tenant via `tenant_id` por tabela)
 - **Fila:** Bull + Redis (processamento assíncrono de despachos)
 - **Integrações:** WooCommerce REST API v3 + Melhor Envio API
 
@@ -48,22 +51,29 @@ WooStock é uma **API de logística como serviço** para lojas WooCommerce. Cada
 
 Arquitetura enxuta em 3 camadas:
 
-### 2.1 API Layer (NestJS)
+### 2.1 Frontend (Next.js — `apps/web`)
+
+- Página pública de tracking: `/tracking/[trackingCode]`
+- Sem login — o cliente acessa pelo código de rastreio recebido por e-mail/Woo
+- Consome o endpoint `GET /shipping/tracking/:trackingCode` da API
+- Exibe timeline completa: preparação → despacho → em trânsito → entregue
+
+### 2.2 API Layer (NestJS — `apps/api`)
 
 - REST API pública (endpoints de logística)
 - Webhook receiver para eventos do WooCommerce
 - Guard de autenticação via API key no header (`X-API-Key`)
 
-### 2.2 Core Modules
+### 2.3 Core Modules
 
-| Módulo     | Responsabilidade                                                               |
-| ---------- | ------------------------------------------------------------------------------ |
-| `api-keys` | Geração e validação de API keys, associação com tenant                         |
-| `orders`   | Recebe pedidos do Woo via webhook, armazena dados de envio                     |
-| `shipping` | Cotação de frete, geração de etiqueta, consulta de rastreio (via Melhor Envio) |
-| `tracking` | Cron que atualiza status de rastreio e notifica o Woo                          |
+| Módulo     | Responsabilidade                                                                      |
+| ---------- | ------------------------------------------------------------------------------------- |
+| `api-keys` | Geração e validação de API keys, associação com tenant                                |
+| `orders`   | Recebe pedidos do Woo via webhook, armazena dados de envio                            |
+| `shipping` | Cotação de frete, geração de etiqueta, consulta de rastreio, timeline de tracking     |
+| `tracking` | Cron que atualiza status de rastreio e notifica o Woo                                 |
 
-### 2.3 Integration Layer
+### 2.4 Integration Layer
 
 | Componente            | Responsabilidade                                                              |
 | --------------------- | ----------------------------------------------------------------------------- |
@@ -257,32 +267,60 @@ Efeito colateral: atualiza o pedido no WooCommerce via API com o `tracking_code`
 
 ### 4.5 Consulta de Rastreio
 
-**`GET /shipping/tracking/:shipment_id`**
+**`GET /shipping/tracking/:trackingCode`**
 
-Retorna status atual do envio.
+Retorna status atual e timeline completa do envio, incluindo os eventos de preparação do pedido anteriores ao despacho físico. Autenticado via API key do tenant.
 
 Response:
 
 ```json
 {
-  "shipment_id": "uuid",
   "tracking_code": "BR123456789BR",
-  "carrier": "correios",
-  "status": "in_transit",
-  "events": [
+  "current_status": "in_transit",
+  "carrier": "Correios",
+  "service": "SEDEX",
+  "estimated_days": 3,
+  "label_url": "https://melhorenvio.com/labels/xxx.pdf",
+  "order": {
+    "id": "uuid",
+    "woo_order_id": 1042,
+    "customer_name": "João Silva",
+    "customer_email": "joao@email.com"
+  },
+  "timeline": [
     {
-      "date": "2026-04-12T10:30:00Z",
-      "description": "Objeto postado",
-      "location": "Fortaleza/CE"
+      "type": "preparation",
+      "status": "order_received",
+      "description": "Pedido recebido da loja",
+      "location": null,
+      "occurred_at": "2026-04-12T09:00:00Z"
     },
     {
-      "date": "2026-04-12T18:00:00Z",
+      "type": "preparation",
+      "status": "quoted",
+      "description": "Frete cotado — Correios SEDEX",
+      "location": null,
+      "occurred_at": "2026-04-12T09:15:00Z"
+    },
+    {
+      "type": "shipment",
+      "status": "label_generated",
+      "description": "Etiqueta gerada",
+      "location": null,
+      "occurred_at": "2026-04-12T09:20:00Z"
+    },
+    {
+      "type": "shipment",
+      "status": "in_transit",
       "description": "Objeto em trânsito",
-      "location": "São Paulo/SP"
+      "location": "São Paulo/SP",
+      "occurred_at": "2026-04-12T18:00:00Z"
     }
   ]
 }
 ```
+
+A página pública de tracking (`/tracking/:trackingCode` no frontend Next.js) consome este endpoint sem autenticação via proxy do Next.js.
 
 ### 4.6 Listagem de Pedidos
 
@@ -435,16 +473,21 @@ Esse CLI é um command do NestJS (`@nestjs/cli`) que roda localmente ou via SSH 
 
 ---
 
-## 9. Fora do Escopo (Futuro)
+## 9. Fora do Escopo do MVP (Futuro)
 
-- Dashboard / frontend para o lojista
+**Entrega e transporte:**
+- Infraestrutura de transporte próprio (entregadores, frota, roteirização) — MVP usa entrega mockada
+- Integração com gateway de pagamento para cobrar taxa de entrega da loja após conclusão
+
+**Produto:**
+- Dashboard / painel admin para o lojista
 - Cadastro self-service de tenants
-- Gestão de estoque
-- Gestão de produtos / catálogo
-- Processamento de pagamentos
-- Múltiplas lojas por tenant
 - Plugin WooCommerce oficial (para facilitar setup)
-- Painel admin web (substituir CLI)
-- Notificações (email, WhatsApp)
-- Relatórios e analytics
-- Planos e billing
+- Notificações ao cliente (e-mail, WhatsApp com link de tracking)
+- Relatórios e analytics de entregas
+- Planos e billing automatizado
+
+**Técnico:**
+- Múltiplas lojas por tenant
+- Gestão de produtos / catálogo / estoque
+- Processamento de pagamentos do consumidor final

@@ -42,12 +42,12 @@ model Tenant {
   name                          String?
   store_url                     String
   api_key_hash                  String       @unique
-  woo_consumer_key_encrypted    String
-  woo_consumer_secret_encrypted String
+  woo_consumer_key_encrypted    String?
+  woo_consumer_secret_encrypted String?
   webhook_secret                String
-  origin_zip                    String
-  origin_address                Json
-  melhor_envio_token_encrypted  String
+  origin_zip                    String?
+  origin_address                Json?
+  melhor_envio_token_encrypted  String?
   status                        TenantStatus
   created_at                    DateTime     @default(now())
 
@@ -76,18 +76,30 @@ model Shipment {
   tenant_id                String         @db.ObjectId
   order_id                 String         @unique @db.ObjectId
   melhor_envio_shipment_id String?
-  carrier                  String
-  service                  String
+  carrier                  String?
+  service                  String?
   tracking_code            String?
   label_url                String?
   status                   ShipmentStatus
-  shipping_cost            Float
-  estimated_days           Int
+  shipping_cost            Float?
+  estimated_days           Int?
   quoted_options           Json
   created_at               DateTime       @default(now())
   updated_at               DateTime       @updatedAt
 
   @@map("shipments")
+}
+
+model ShipmentEvent {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  tenant_id   String         @db.ObjectId
+  shipment_id String         @db.ObjectId
+  status      ShipmentStatus
+  location    String?
+  description String
+  occurred_at DateTime       @default(now())
+
+  @@map("shipment_events")
 }
 
 model WebhookLog {
