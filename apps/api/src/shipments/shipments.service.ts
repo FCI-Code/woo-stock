@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { generateTrackingCode } from '../common/tracking/tracking-code.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { ListShipmentsQueryDto } from './dto/list-shipments-query.dto';
@@ -8,6 +9,33 @@ import { UpdateShipmentStatusDto } from './dto/update-shipment-status.dto';
 @Injectable()
 export class ShipmentsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createForNewOrder(tenantId: string, orderId: string) {
+    const existing = await this.prisma.shipment.findUnique({
+      where: { order_id: orderId },
+    });
+    if (existing) return null;
+
+    const trackingCode = generateTrackingCode();
+    const shipment = await this.prisma.shipment.create({
+      data: {
+        tenant_id: tenantId,
+        order_id: orderId,
+        status: 'pending',
+        tracking_code: trackingCode,
+        quoted_options: {},
+      },
+    });
+    await this.prisma.shipmentEvent.create({
+      data: {
+        tenant_id: tenantId,
+        shipment_id: shipment.id,
+        status: 'pending',
+        description: 'Pedido recebido - aguardando processamento',
+      },
+    });
+    return shipment;
+  }
 
   async create(tenantId: string, dto: CreateShipmentDto) {
     const [shipment] = await this.prisma.$transaction([
