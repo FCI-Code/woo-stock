@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getShipment } from '@/lib/shipments';
 import { ShipmentEventTimeline } from '@/components/dashboard/shipments/ShipmentEventTimeline';
+import { ShipmentStatusUpdater } from '@/components/dashboard/shipments/ShipmentStatusUpdater';
 import type { ShipmentStatus } from '@/types/tracking';
 
 export const metadata: Metadata = {
@@ -57,9 +58,16 @@ export default async function ShipmentDetailPage({ params }: Props) {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
             Envio
           </p>
-          <span className={`text-[10px] font-semibold px-1.5 py-0.5 ${STATUS_STYLE[shipment.status]}`}>
-            {STATUS_LABEL[shipment.status]}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 ${STATUS_STYLE[shipment.status]}`}>
+              {STATUS_LABEL[shipment.status]}
+            </span>
+            <ShipmentStatusUpdater
+              shipmentId={shipment.id}
+              currentStatus={shipment.status}
+              apiKey={apiKey}
+            />
+          </div>
         </div>
 
         <div className="px-5 py-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
