@@ -30,3 +30,27 @@ export async function getShipment(apiKey: string, id: string): Promise<ShipmentD
 
   return res.json() as Promise<ShipmentDetail>;
 }
+
+export async function updateShipmentStatus(
+  apiKey: string,
+  id: string,
+  status: ShipmentStatus,
+  description?: string,
+  location?: string,
+) {
+  const res = await fetch(`${API_URL}/shipments/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': apiKey,
+    },
+    body: JSON.stringify({ status, description, location }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => null);
+    throw new Error(text || 'Failed to update shipment status');
+  }
+
+  return res.json();
+}

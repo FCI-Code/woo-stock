@@ -25,7 +25,7 @@ export default async function OrderDetailPage({ params }: Props) {
   if (!order) notFound();
 
   const hasActiveShipment =
-    order.shipment !== null && order.shipment.status !== 'quoted';
+    (order.shipment !== null)
 
   return (
     <div className="max-w-3xl w-full mx-auto px-4 py-6 flex flex-col gap-4">
