@@ -1,4 +1,5 @@
 export type ShipmentStatus =
+  | 'pending'
   | 'quoted'
   | 'label_generated'
   | 'posted'

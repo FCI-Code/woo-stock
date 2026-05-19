@@ -4,6 +4,12 @@ const STATUS_CONFIG: Record<
   ShipmentStatus,
   { label: string; bg: string; text: string; border: string }
 > = {
+  pending: {
+    label: 'Aguardando processamento',
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    border: 'border-slate-200',
+  },
   quoted: {
     label: 'Cotado',
     bg: 'bg-amber-50',

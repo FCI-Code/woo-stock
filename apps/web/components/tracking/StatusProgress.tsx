@@ -9,6 +9,7 @@ const STEPS: { status: ShipmentStatus; label: string }[] = [
 ];
 
 const STATUS_ORDER: Record<ShipmentStatus, number> = {
+  pending: -1,
   quoted: 0,
   label_generated: 1,
   posted: 2,
@@ -22,6 +23,16 @@ interface Props {
 }
 
 export function StatusProgress({ current }: Props) {
+  if (current === 'pending') {
+    return (
+      <div className="px-5 py-3 border-b border-slate-100">
+        <p className="text-xs text-slate-500 font-medium">
+          Pedido recebido, aguardando processamento.
+        </p>
+      </div>
+    );
+  }
+
   if (current === 'error') {
     return (
       <div className="px-5 py-3 border-b border-slate-100">
