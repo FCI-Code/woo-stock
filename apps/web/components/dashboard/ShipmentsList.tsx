@@ -3,6 +3,7 @@ import type { Shipment } from '@/types/shipment';
 import type { ShipmentStatus } from '@/types/tracking';
 
 const STATUS_LABEL: Record<ShipmentStatus, string> = {
+  pending: 'Aguardando',
   quoted: 'Cotado',
   label_generated: 'Etiqueta Gerada',
   posted: 'Postado',
@@ -12,6 +13,7 @@ const STATUS_LABEL: Record<ShipmentStatus, string> = {
 };
 
 const STATUS_STYLE: Record<ShipmentStatus, string> = {
+  pending: 'bg-slate-100 text-slate-600',
   quoted: 'bg-amber-50 text-amber-700',
   label_generated: 'bg-amber-50 text-amber-700',
   posted: 'bg-sky-50 text-sky-700',
