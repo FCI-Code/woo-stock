@@ -23,6 +23,7 @@ enum OrderStatus {
 }
 
 enum ShipmentStatus {
+  pending
   quoted
   label_generated
   posted

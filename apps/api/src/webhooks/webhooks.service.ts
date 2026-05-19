@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ShipmentsService } from '../shipments/shipments.service';
 import { OrdersService } from '../orders/orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WoocommerceOrderPayloadDto } from './dto/woocommerce-order.dto';
@@ -11,6 +12,7 @@ export class WebhooksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ordersService: OrdersService,
+    private readonly shipmentsService: ShipmentsService,
   ) {}
 
   async handleOrderEvent(
@@ -28,7 +30,8 @@ export class WebhooksService {
     };
 
     try {
-      await this.ordersService.upsertFromWoo(tenantId, payload);
+      const order = await this.ordersService.upsertFromWoo(tenantId, payload);
+      await this.shipmentsService.createForNewOrder(tenantId, order.id);
       await this.prisma.webhookLog.create({
         data: {
           tenant_id: tenantId,
