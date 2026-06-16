@@ -1,4 +1,4 @@
-import { ScrollView, Pressable, Text } from 'react-native';
+import { View, ScrollView, Pressable, Text } from 'react-native';
 import type { OrderStatus } from '@woo-stock/shared-types';
 
 const FILTERS: { label: string; value: OrderStatus | undefined }[] = [
@@ -22,8 +22,8 @@ export function OrderStatusFilter({ selected, onSelect }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className="px-4 py-2"
-      contentContainerStyle={{ gap: 8 }}
+      style={{ flexGrow: 0 }}
+      contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 8 }}
     >
       {FILTERS.map((f) => {
         const isActive = selected === f.value;
