@@ -16,6 +16,7 @@ async function bootstrap() {
     .addApiKey({ type: 'apiKey', in: 'header', name: 'X-API-Key' }, 'X-API-Key')
     .build();
 
+  app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const document = SwaggerModule.createDocument(app, config);
